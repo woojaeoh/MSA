@@ -8,9 +8,13 @@ import com.example.demo.member.presentation.dto.req.MemberJoinReq;
 import com.example.demo.member.presentation.dto.res.MemberAdmRes;
 import com.example.demo.member.presentation.dto.res.MemberRes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -40,12 +44,23 @@ public class MemberService implements MemberUseCase {
     @Transactional
     public MemberRes join(MemberJoinReq req) {
 
+        // 1. 전화번호 중복 체크
         if (memberRepository.findByPhone(req.phone()).isPresent()) {
             throw new DuplicatePhoneException(req.phone());
         }
 
+        // 2. saltKey 생성 (14자리)
+        SecureRandom random = new SecureRandom();
+        String saltKey = Base64.getEncoder().encodeToString(random.generateSeed(16)).substring(0, 14);
 
-        Member member = Member.create(req.email(), req.name(), req.password(), req.phone(), req.address());
+        // 3. 비밀번호 암호화 (password + saltKey)
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        String encodedPassword = encoder.encode(req.password() + saltKey);
+
+        // 4. Member 생성 → saltKey 덮어쓰기
+        Member member = Member.create(req.email(), req.name(), encodedPassword, req.phone(), req.address());
+        member.setSaltKey(saltKey);
+
         Member saved = memberRepository.save(member);
         return changeMemberResType(saved);
     }
