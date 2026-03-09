@@ -1,6 +1,10 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  batch:
+    job:
+      enabled: false
+
   application:
     name: backend5
   datasource:
@@ -11,6 +15,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:org/springframework/batch/core/schema-postgresql.sql
+      continue-on-error: true
+
 
 springdog:
   swagger-ui:

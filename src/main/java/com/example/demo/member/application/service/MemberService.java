@@ -4,10 +4,12 @@ import com.example.demo.member.application.domain.repository.MemberRepository;
 import com.example.demo.member.application.exception.DuplicatePhoneException;
 import com.example.demo.member.application.usecase.MemberUseCase;
 import com.example.demo.member.domain.model.Member;
+import com.example.demo.member.presentation.dto.req.Login;
 import com.example.demo.member.presentation.dto.req.MemberJoinReq;
 import com.example.demo.member.presentation.dto.res.MemberAdmRes;
 import com.example.demo.member.presentation.dto.res.MemberRes;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true) //변수가 바껴도, 데이터베이스 값이 바뀌면 안되기 때문.
 @RequiredArgsConstructor
+@Slf4j
+
 public class MemberService implements MemberUseCase {
 
     public final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder  = new BCryptPasswordEncoder();
 
     @Override
     public List<MemberRes> findAll(){
@@ -73,6 +79,14 @@ public class MemberService implements MemberUseCase {
         );
     }
 
-
+    @Override
+    public Boolean login(Login login) {
+        Member member = memberRepository.findByEmail(login.email())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+        if(passwordEncoder.matches(login.password()+member.getSaltKey(), member.getPassword())){
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.example.demo.member.domain.model.presentation.controller;
 
 import com.example.demo.member.application.usecase.MemberUseCase;
+import com.example.demo.member.presentation.dto.req.Login;
 import com.example.demo.member.presentation.dto.req.MemberJoinReq;
 import com.example.demo.member.presentation.dto.res.MemberAdmRes;
 import com.example.demo.member.presentation.dto.res.MemberRes;
@@ -33,5 +34,10 @@ public class MemberController {
     @PostMapping("join")
     public ResponseEntity<MemberRes> join(@RequestBody MemberJoinReq req){
         return ResponseEntity.status(HttpStatus.CREATED).body(memberUseCase.join(req));
+    }
+
+    @PostMapping("login")
+    public ResponseEntity<Boolean> login(@RequestBody Login login){
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberUseCase.login(login));
     }
 }
