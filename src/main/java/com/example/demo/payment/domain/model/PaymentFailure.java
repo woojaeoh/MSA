@@ -1,12 +1,12 @@
 package com.example.demo.payment.domain.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Entity
+@Table(name = "\"payment_failure\"", schema = "public")
 public class PaymentFailure {
 
     @Id
@@ -60,4 +60,50 @@ public class PaymentFailure {
                                       String rawPayload) {
         return new PaymentFailure(orderId, paymentKey, errorCode, errorMessage, amount, rawPayload);
     }
+
+    @PrePersist
+    public void onCreate() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
+        createdAt = LocalDateTime.now();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public String getRawPayload() {
+        return rawPayload;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+
+
+
+
+
 }

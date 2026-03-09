@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface PaymentRepository {
 
-    Page<Payment> findAll(Pageable pageable);
+   // Page<Payment> findAll(Pageable pageable);
 
     Optional<Payment> findById(UUID id);
 

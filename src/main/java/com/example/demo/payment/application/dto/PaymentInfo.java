@@ -1,7 +1,7 @@
 package com.example.demo.payment.application.dto;
 
 import com.example.demo.payment.domain.model.Payment;
-import com.example.demo.payment.domain.model.PaymentStatus;
+import com.example.demo.payment.domain.PaymentStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

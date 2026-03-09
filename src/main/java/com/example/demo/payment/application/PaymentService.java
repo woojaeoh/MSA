@@ -1,10 +1,14 @@
 package com.example.demo.payment.application;
 
+import com.example.demo.payment.application.dto.PaymentFailureInfo;
 import com.example.demo.payment.application.dto.PaymentInfo;
 import com.example.demo.payment.client.TossPaymentClient;
 import com.example.demo.payment.client.dto.PaymentCommand;
+
+import com.example.demo.payment.application.dto.PaymentFailCommand;
 import com.example.demo.payment.client.dto.TossPaymentResponse;
 import com.example.demo.payment.domain.model.Payment;
+import com.example.demo.payment.domain.model.PaymentFailure;
 import com.example.demo.payment.domain.model.repository.PaymentFailureRepository;
 import com.example.demo.payment.domain.model.repository.PaymentRepository;
 import lombok.AllArgsConstructor;
@@ -18,7 +22,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-//private final PaymentFailureRepository paymentFailureRepository;
+    private final PaymentFailureRepository paymentFailureRepository;
     private final TossPaymentClient tossPaymentClient;
 
     public ResponseEntity<PaymentInfo> confirm(PaymentCommand command) {
@@ -37,6 +41,19 @@ public class PaymentService {
 
         Payment saved = paymentRepository.save(payment);
         return ResponseEntity.status(HttpStatus.CREATED).body(PaymentInfo.from(saved));
+    }
+
+    public ResponseEntity<PaymentFailureInfo> recordFailure(PaymentFailCommand command) {
+        PaymentFailure failure = PaymentFailure.from(
+                command.orderId(),
+                command.paymentKey(),
+                command.errorCode(),
+                command.errorMessage(),
+                command.amount(),
+                command.rawPayload()
+        );
+        PaymentFailure saved = paymentFailureRepository.save(failure);
+        return ResponseEntity.status(HttpStatus.CREATED).body(PaymentFailureInfo.from(saved));
     }
 
 }

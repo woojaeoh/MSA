@@ -1,4 +1,4 @@
-package com.example.demo.payment.domain.model;
+package com.example.demo.payment.domain;
 
 public enum PaymentStatus {
     READY,

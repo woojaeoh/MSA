@@ -16,10 +16,10 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
     @Autowired
     private PaymentJpaRepository paymentJpaRepository;
 
-    @Override
-    public Page<Payment> findAll(Pageable pageable) {
-        return paymentJpaRepository.findAll(pageable);
-    }
+//    @Override
+//    public Page<Payment> findAll(Pageable pageable) {
+//        return paymentJpaRepository.findAll(pageable);
+//    }
 
     @Override
     public Optional<Payment> findById(UUID id) {

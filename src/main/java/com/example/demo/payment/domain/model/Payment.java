@@ -1,13 +1,7 @@
 package com.example.demo.payment.domain.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import com.example.demo.payment.domain.PaymentStatus;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -76,6 +70,19 @@ public class Payment {
     public void markFailed(String failReason) {
         this.status = PaymentStatus.FAILED;
         this.failReason = failReason;
+    }
+
+    @PrePersist
+    public void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
+        createdAt = now;
+        updatedAt = now;
+        if (status == null) {
+            status = PaymentStatus.READY;
+        }
     }
 
     public UUID getId() {
