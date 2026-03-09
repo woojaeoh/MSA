@@ -1,0 +1,42 @@
+package com.example.demo.payment.application;
+
+import com.example.demo.payment.application.dto.PaymentInfo;
+import com.example.demo.payment.client.TossPaymentClient;
+import com.example.demo.payment.client.dto.PaymentCommand;
+import com.example.demo.payment.client.dto.TossPaymentResponse;
+import com.example.demo.payment.domain.model.Payment;
+import com.example.demo.payment.domain.model.repository.PaymentFailureRepository;
+import com.example.demo.payment.domain.model.repository.PaymentRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+@AllArgsConstructor
+public class PaymentService {
+    private final PaymentRepository paymentRepository;
+//private final PaymentFailureRepository paymentFailureRepository;
+    private final TossPaymentClient tossPaymentClient;
+
+    public ResponseEntity<PaymentInfo> confirm(PaymentCommand command) {
+        TossPaymentResponse tossPayment = tossPaymentClient.confirm(command);
+//        UUID orderId = UUID.fromString(tossPayment.orderId());
+//        PurchaseOrder order = orderService.findEntity(orderId);
+        Payment payment = Payment.create(
+                tossPayment.paymentKey(),
+                tossPayment.orderId(),
+                tossPayment.totalAmount()
+        );
+        LocalDateTime approvedAt = tossPayment.approvedAt() != null ? tossPayment.approvedAt().toLocalDateTime() : null;
+        LocalDateTime requestedAt = tossPayment.requestedAt() != null ? tossPayment.requestedAt().toLocalDateTime() : null;
+
+        payment.markConfirmed(tossPayment.method(), approvedAt, requestedAt);
+
+        Payment saved = paymentRepository.save(payment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(PaymentInfo.from(saved));
+    }
+
+}
