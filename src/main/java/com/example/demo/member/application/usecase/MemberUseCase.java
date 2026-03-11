@@ -1,5 +1,6 @@
 package com.example.demo.member.application.usecase;
 
+import com.example.demo.member.application.dto.TokenResponse;
 import com.example.demo.member.presentation.dto.req.Login;
 import com.example.demo.member.presentation.dto.req.MemberJoinReq;
 import com.example.demo.member.presentation.dto.res.MemberAdmRes;
@@ -13,5 +14,5 @@ public interface MemberUseCase {
     List<MemberAdmRes> findAdmAll();
     MemberRes join(MemberJoinReq req);
 
-    Boolean login(Login login);
+    TokenResponse login(Login login);
 }

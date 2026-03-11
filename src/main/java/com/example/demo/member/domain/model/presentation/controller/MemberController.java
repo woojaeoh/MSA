@@ -1,6 +1,7 @@
 package com.example.demo.member.domain.model.presentation.controller;
 
 import com.example.demo.member.application.usecase.MemberUseCase;
+import com.example.demo.member.application.dto.TokenResponse;
 import com.example.demo.member.presentation.dto.req.Login;
 import com.example.demo.member.presentation.dto.req.MemberJoinReq;
 import com.example.demo.member.presentation.dto.res.MemberAdmRes;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -37,7 +39,10 @@ public class MemberController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<Boolean> login(@RequestBody Login login){
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberUseCase.login(login));
+    public ResponseEntity<Boolean> login(@RequestBody Login login) throws NoSuchAlgorithmException {
+        TokenResponse tokenResponse = memberUseCase.login(login);
+        ResponseEntity<Boolean> responseEntity = ResponseEntity.ok(tokenResponse.isLogin());
+        responseEntity.getHeaders().setBearerAuth(tokenResponse.token());
+        return responseEntity;
     }
 }

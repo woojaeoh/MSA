@@ -1,5 +1,7 @@
 package com.example.demo.member.application.service;
 
+import com.example.demo.member.application.dto.TokenResponse;
+import com.example.demo.member.util.JwtProvider;
 import com.example.demo.member.application.domain.repository.MemberRepository;
 import com.example.demo.member.application.exception.DuplicatePhoneException;
 import com.example.demo.member.application.usecase.MemberUseCase;
@@ -10,6 +12,8 @@ import com.example.demo.member.presentation.dto.res.MemberAdmRes;
 import com.example.demo.member.presentation.dto.res.MemberRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,14 +28,15 @@ import java.util.Optional;
 @Transactional(readOnly = true) //변수가 바껴도, 데이터베이스 값이 바뀌면 안되기 때문.
 @RequiredArgsConstructor
 @Slf4j
-
 public class MemberService implements MemberUseCase {
 
     public final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder  = new BCryptPasswordEncoder();
+    private final JwtProvider jwtProvider;
 
     @Override
     public List<MemberRes> findAll(){
+        //jwtProvider.makeRsaKey();
         return memberRepository.findAll().stream().map(this::changeMemberResType).toList();
     }
 
@@ -80,13 +85,17 @@ public class MemberService implements MemberUseCase {
     }
 
     @Override
-    public Boolean login(Login login) {
+    public TokenResponse login(Login login) { //response의 헤더에 토큰을
         Member member = memberRepository.findByEmail(login.email())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
         if(passwordEncoder.matches(login.password()+member.getSaltKey(), member.getPassword())){
-            return true;
+            Authentication authentication = new UsernamePasswordAuthenticationToken(member.getId().toString(), null);
+            TokenResponse response = new TokenResponse(true, jwtProvider.generateToken(authentication));
+            return response;
         }
-        return false;
+
+        return new TokenResponse(false, null);
+
     }
 
 }
